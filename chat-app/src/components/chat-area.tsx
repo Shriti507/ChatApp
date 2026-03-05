@@ -7,7 +7,7 @@ import { Send, Paperclip, Image, File, X, Download } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatMessageTimestamp } from "../utils/format-timestamp";
-import { uploadFile, formatFileForMessage, getFileEmoji, formatFileSize } from "../utils/file-upload";
+import { uploadFile, formatFileSize } from "../utils/convex-storage";
 import { Id } from "../../convex/_generated/dataModel";
 
 
@@ -118,13 +118,25 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
   };
 
   const handleFileDownload = (attachment: any) => {
-    // Create a temporary link to download the file
-    const link = document.createElement('a');
-    link.href = attachment.url;
-    link.download = attachment.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Handle base64 encoded files
+    if (attachment.url.startsWith('data:')) {
+      // Convert base64 to blob and download
+      const link = document.createElement('a');
+      link.href = attachment.url;
+      link.download = attachment.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // Handle regular URLs
+      const link = document.createElement('a');
+      link.href = attachment.url;
+      link.download = attachment.name;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const renderMessageContent = (msg: any) => {
@@ -136,27 +148,52 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
         {msg.attachments && msg.attachments.length > 0 && (
           <div className="mt-2 space-y-2">
             {msg.attachments.map((attachment: any, index: number) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
-                onClick={() => handleFileDownload(attachment)}
-              >
-                <div className="flex-shrink-0">
-                  {attachment.type.startsWith('image/') ? (
-                    <Image className="w-4 h-4 text-blue-500" />
-                  ) : (
-                    <File className="w-4 h-4 text-gray-500" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-gray-900 truncate">
-                    {attachment.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {formatFileSize(attachment.size)}
-                  </p>
-                </div>
-                <Download className="w-3 h-3 text-gray-400" />
+              <div key={index}>
+                {attachment.type.startsWith('image/') ? (
+                  // Display images inline
+                  <div className="space-y-2">
+                    <img
+                      src={attachment.url}
+                      alt={attachment.name}
+                      className="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => handleFileDownload(attachment)}
+                    />
+                    <div className="flex items-center gap-2 text-xs opacity-70">
+                      <Image className="w-3 h-3" />
+                      <span>{attachment.name}</span>
+                      <span>({formatFileSize(attachment.size)})</span>
+                    </div>
+                  </div>
+                ) : (
+                  // Display other files as download cards
+                  <div
+                    className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleFileDownload(attachment)}
+                  >
+                    <div className="flex-shrink-0">
+                      {attachment.type.startsWith('video/') ? (
+                        <div className="w-8 h-8 bg-purple-100 rounded flex items-center justify-center">
+                          <span className="text-xs">🎥</span>
+                        </div>
+                      ) : attachment.type.startsWith('audio/') ? (
+                        <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
+                          <span className="text-xs">🎵</span>
+                        </div>
+                      ) : (
+                        <File className="w-4 h-4 text-gray-500" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-900 truncate">
+                        {attachment.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatFileSize(attachment.size)}
+                      </p>
+                    </div>
+                    <Download className="w-3 h-3 text-gray-400" />
+                  </div>
+                )}
               </div>
             ))}
           </div>
