@@ -7,6 +7,7 @@ export default clerkMiddleware((auth, req) => {
     // Don't require auth for public routes
     return;
   }
+  
   // Protect all other routes
   auth.protect();
 });

@@ -31,12 +31,21 @@ export const getUsers = query({
   },
 });
 
-export const getUserByClerkId = query({
-  args: { clerkId: v.string() },
+export const getOtherUsers = query({
+  args: { currentClerkId: v.string() },
   handler: async (ctx, args) => {
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk", (q) => q.eq("clerkId", args.currentClerkId))
+      .first();
+    
+    if (!currentUser) {
+      return await ctx.db.query("users").collect();
+    }
+    
     return await ctx.db
       .query("users")
-      .withIndex("by_clerk", (q) => q.eq("clerkId", args.clerkId))
-      .first();
+      .filter((q) => q.neq(q.field("_id"), currentUser._id))
+      .collect();
   },
 });

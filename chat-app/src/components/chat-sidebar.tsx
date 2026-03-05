@@ -2,9 +2,24 @@
 
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Plus } from "lucide-react";
+import { useEffect } from "react";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { UserDiscovery } from "./user-discovery";
 
 export function ChatSidebar() {
   const { user } = useUser();
+  const createUser = useMutation(api.functions.createUser);
+
+  useEffect(() => {
+    if (user) {
+      createUser({
+        clerkId: user.id,
+        username: user.username || user.firstName || "Unknown",
+        imageUrl: user.imageUrl,
+      });
+    }
+  }, [user, createUser]);
 
   return (
     <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
@@ -37,6 +52,8 @@ export function ChatSidebar() {
             </div>
           </div>
         </div>
+        
+        <UserDiscovery />
       </div>
     </div>
   );
