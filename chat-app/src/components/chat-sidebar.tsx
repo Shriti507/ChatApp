@@ -1,15 +1,22 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import { Plus } from "lucide-react";
 
 export function ChatSidebar() {
+  const { user } = useUser();
+
   return (
     <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">Chat App</h1>
-          <UserButton />
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">
+              {user?.firstName || user?.username}
+            </span>
+            <UserButton />
+          </div>
         </div>
       </div>
       
