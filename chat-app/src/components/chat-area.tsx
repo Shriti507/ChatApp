@@ -7,7 +7,7 @@ import { Send, Paperclip, Image, File, X, Download } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatMessageTimestamp } from "../utils/format-timestamp";
-import { uploadFile, formatFileSize, triggerDownload } from "../utils/temp-file-host";
+import { uploadFile, formatFileSize, downloadFile } from "../utils/file-hosting";
 import { Id } from "../../convex/_generated/dataModel";
 
 
@@ -69,9 +69,9 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
     if (!files) return;
     
     const newFiles = Array.from(files).filter(file => {
-      // Check file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        alert(`File "${file.name}" is too large. Maximum size is 10MB.`);
+      // Check file size (max 2MB for Convex compatibility)
+      if (file.size > 2 * 1024 * 1024) {
+        alert(`File "${file.name}" is too large. Maximum size is 2MB.`);
         return false;
       }
       return true;
@@ -118,7 +118,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
   };
 
   const handleFileDownload = (attachment: any) => {
-    triggerDownload(attachment);
+    downloadFile(attachment);
   };
 
   const renderMessageContent = (msg: any) => {
@@ -311,6 +311,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
             className="hidden"
             onChange={(e) => handleFileSelect(e.target.files)}
             accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip,.rar"
+            title="Maximum file size: 2MB"
           />
           
           <button
