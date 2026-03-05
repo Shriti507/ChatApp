@@ -55,12 +55,26 @@ export function ConversationList() {
 
       {/* Conversation List */}
       {conversations.length === 0 ? (
-        <div className="text-center py-8">
-          <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm text-gray-500 font-medium">No conversations with messages</p>
-          <p className="text-xs text-gray-400 mt-1">
-            Start a conversation and send a message to see it here
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <MessageCircle className="w-6 h-6 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No conversations yet</h3>
+          <p className="text-sm text-gray-500 text-center max-w-md mb-6">
+            Start chatting! Find users in the discovery section and send your first message
           </p>
+          <div className="w-full space-y-3">
+            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <p className="text-xs text-amber-700">
+                📝 Note: Conversations appear here after you send at least one message
+              </p>
+            </div>
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-xs text-blue-700">
+                💡 Tip: Scroll down to discover users and start conversations
+              </p>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="space-y-1 max-h-80 overflow-y-auto">

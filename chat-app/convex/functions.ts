@@ -136,6 +136,13 @@ export const sendMessage = mutation({
     conversationId: v.id("conversations"),
     content: v.string(),
     senderId: v.id("users"),
+    attachments: v.optional(v.array(v.object({
+      id: v.string(),
+      name: v.string(),
+      size: v.number(),
+      type: v.string(),
+      url: v.string(),
+    }))),
   },
   handler: async (ctx, args) => {
     const messageId = await ctx.db.insert("messages", {
@@ -143,6 +150,7 @@ export const sendMessage = mutation({
       senderId: args.senderId,
       content: args.content,
       createdAt: Date.now(),
+      attachments: args.attachments,
     });
 
     // Update conversation's last message

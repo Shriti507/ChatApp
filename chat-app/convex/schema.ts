@@ -23,6 +23,13 @@ export default defineSchema({
     senderId: v.id("users"),
     content: v.string(),
     createdAt: v.number(),
+    attachments: v.optional(v.array(v.object({
+      id: v.string(),
+      name: v.string(),
+      size: v.number(),
+      type: v.string(),
+      url: v.string(),
+    }))),
   }).index("by_conversation", ["conversationId"]),
   
   conversationMembers: defineTable({

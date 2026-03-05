@@ -90,22 +90,51 @@ export function UserDiscovery() {
 
       {/* User List */}
       {filteredUsers.length === 0 ? (
-        <div className="text-center py-8">
+        <div className="text-center py-12">
           {debouncedSearchQuery ? (
             <>
-              <Search className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-500 font-medium">No users found</p>
-              <p className="text-xs text-gray-400 mt-1">
-                Try searching for a different name
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="w-6 h-6 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+              <p className="text-sm text-gray-500 text-center max-w-md mb-6">
+                We couldn't find any users matching "{debouncedSearchQuery}"
               </p>
+              <div className="w-full space-y-3">
+                <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                  <p className="text-xs text-amber-700">
+                    Try: Check spelling, use different keywords, or browse all users below
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="w-full p-3 bg-blue-50 rounded-lg border border-blue-200 text-blue-700 text-sm font-medium hover:bg-blue-100 transition-colors"
+                >
+                  Clear search and show all users
+                </button>
+              </div>
             </>
           ) : (
             <>
-              <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-500 font-medium">No other users</p>
-              <p className="text-xs text-gray-400 mt-1">
-                Be the first to start a conversation!
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-6 h-6 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No other users</h3>
+              <p className="text-sm text-gray-500 text-center max-w-md mb-6">
+                Be the first to invite friends and start conversations!
               </p>
+              <div className="w-full space-y-3">
+                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-xs text-green-700">
+                    Invite: Share your chat link to bring friends to the conversation
+                  </p>
+                </div>
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-xs text-blue-700">
+                    Tip: More users will appear as they join the chat app
+                  </p>
+                </div>
+              </div>
             </>
           )}
         </div>
