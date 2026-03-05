@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { MessageCircle, Circle } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { formatMessageTimestamp } from "../utils/format-timestamp";
 
 export function ConversationList() {
   const { user } = useUser();
@@ -34,7 +34,7 @@ export function ConversationList() {
 
   const formatMessageTime = (timestamp?: number) => {
     if (!timestamp) return "";
-    return formatDistanceToNow(timestamp, { addSuffix: true });
+    return formatMessageTimestamp(timestamp);
   };
 
   const truncateMessage = (message: string, maxLength: number = 35) => {

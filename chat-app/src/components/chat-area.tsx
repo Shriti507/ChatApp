@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDistanceToNow } from "date-fns";
+import { formatMessageTimestamp } from "../utils/format-timestamp";
 import { Id } from "../../convex/_generated/dataModel";
 
 
@@ -54,7 +54,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
   };
 
   const formatMessageTime = (timestamp: number) => {
-    return formatDistanceToNow(timestamp, { addSuffix: true });
+    return formatMessageTimestamp(timestamp);
   };
 
   const getOtherUser = () => {
