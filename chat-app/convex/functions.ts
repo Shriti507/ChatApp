@@ -130,3 +130,122 @@ export const getUserByClerkId = query({
       .first();
   },
 });
+
+export const sendMessage = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    content: v.string(),
+    senderId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const messageId = await ctx.db.insert("messages", {
+      conversationId: args.conversationId,
+      senderId: args.senderId,
+      content: args.content,
+      createdAt: Date.now(),
+    });
+
+    // Update conversation's last message
+    await ctx.db.patch(args.conversationId, {
+      lastMessageId: messageId,
+      lastMessageTime: Date.now(),
+    });
+
+    return messageId;
+  },
+});
+
+export const getMessages = query({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, args) => {
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .order("asc")
+      .collect();
+
+    return messages;
+  },
+});
+
+export const getConversation = query({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversationId);
+    return conversation;
+  },
+});
+
+export const getConversationWithDetails = query({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) return null;
+
+    // Get members
+    const members = await Promise.all(
+      conversation.memberIds.map(async (userId) => {
+        const user = await ctx.db.get(userId);
+        return user;
+      })
+    );
+
+    // Get last message
+    let lastMessage = null;
+    if (conversation.lastMessageId) {
+      lastMessage = await ctx.db.get(conversation.lastMessageId);
+    }
+
+    return {
+      ...conversation,
+      members: members.filter(Boolean),
+      lastMessage,
+    };
+  },
+});
+
+export const getUserConversationsWithDetails = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const memberships = await ctx.db
+      .query("conversationMembers")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    const conversations = await Promise.all(
+      memberships.map(async (membership) => {
+        const conversation = await ctx.db.get(membership.conversationId);
+        if (!conversation) return null;
+
+        // Get other user for one-on-one conversations
+        const otherUserId = conversation.memberIds.find(id => id !== args.userId);
+        const otherUser = otherUserId ? await ctx.db.get(otherUserId) : null;
+
+        // Get last message
+        let lastMessage = null;
+        if (conversation.lastMessageId) {
+          lastMessage = await ctx.db.get(conversation.lastMessageId);
+        }
+
+        // Get all messages to check if conversation has any messages
+        const messages = await ctx.db
+          .query("messages")
+          .withIndex("by_conversation", (q) => q.eq("conversationId", conversation._id))
+          .collect();
+
+        // Only return conversations that have at least one message
+        if (messages.length === 0) {
+          return null;
+        }
+
+        return {
+          ...conversation,
+          otherUser,
+          lastMessage,
+        };
+      })
+    );
+
+    return conversations.filter(Boolean);
+  },
+});

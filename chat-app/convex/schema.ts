@@ -6,7 +6,7 @@ export default defineSchema({
     clerkId: v.string(),
     username: v.string(),
     imageUrl: v.string(),
-    isOnline: v.boolean(),
+    isOnline: v.optional(v.boolean()),
     lastSeen: v.optional(v.number()),
   }).index("by_clerk", ["clerkId"]),
   

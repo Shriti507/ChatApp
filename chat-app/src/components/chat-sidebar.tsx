@@ -1,14 +1,16 @@
 "use client";
 
-import { UserButton, useUser } from "@clerk/nextjs";
-import { Plus } from "lucide-react";
+import { UserButton, useUser, useClerk } from "@clerk/nextjs";
+import { Plus, LogOut } from "lucide-react";
 import { useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { UserDiscovery } from "./user-discovery";
+import { ConversationList } from "./conversation-list";
 
 export function ChatSidebar() {
   const { user } = useUser();
+  const { signOut } = useClerk();
   const createUser = useMutation(api.functions.createUser);
 
   useEffect(() => {
@@ -21,6 +23,10 @@ export function ChatSidebar() {
     }
   }, [user, createUser]);
 
+  const handleSignOut = async () => {
+    await signOut({ redirectUrl: "/sign-up" });
+  };
+
   return (
     <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
       <div className="p-4 border-b border-gray-200">
@@ -30,7 +36,16 @@ export function ChatSidebar() {
             <span className="text-sm font-medium">
               {user?.firstName || user?.username}
             </span>
-            <UserButton />
+            <div className="flex items-center gap-2">
+              <UserButton />
+              <button
+                onClick={handleSignOut}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Sign out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -43,16 +58,7 @@ export function ChatSidebar() {
       </div>
       
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4">
-          <h2 className="text-sm font-medium text-gray-500 mb-3">Recent Chats</h2>
-          <div className="space-y-2">
-            <div className="p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-              <div className="font-medium">General Chat</div>
-              <div className="text-sm text-gray-500 truncate">Last message...</div>
-            </div>
-          </div>
-        </div>
-        
+        <ConversationList />
         <UserDiscovery />
       </div>
     </div>
