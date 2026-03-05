@@ -7,7 +7,7 @@ import { Send, Paperclip, Image, File, X, Download } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatMessageTimestamp } from "../utils/format-timestamp";
-import { uploadFile, formatFileSize } from "../utils/convex-storage";
+import { uploadFile, formatFileSize, triggerDownload } from "../utils/temp-file-host";
 import { Id } from "../../convex/_generated/dataModel";
 
 
@@ -118,25 +118,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
   };
 
   const handleFileDownload = (attachment: any) => {
-    // Handle base64 encoded files
-    if (attachment.url.startsWith('data:')) {
-      // Convert base64 to blob and download
-      const link = document.createElement('a');
-      link.href = attachment.url;
-      link.download = attachment.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      // Handle regular URLs
-      const link = document.createElement('a');
-      link.href = attachment.url;
-      link.download = attachment.name;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    triggerDownload(attachment);
   };
 
   const renderMessageContent = (msg: any) => {
