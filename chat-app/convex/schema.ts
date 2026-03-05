@@ -6,6 +6,8 @@ export default defineSchema({
     clerkId: v.string(),
     username: v.string(),
     imageUrl: v.string(),
+    isOnline: v.boolean(),
+    lastSeen: v.optional(v.number()),
   }).index("by_clerk", ["clerkId"]),
   
   conversations: defineTable({
@@ -27,5 +29,6 @@ export default defineSchema({
     conversationId: v.id("conversations"),
     userId: v.id("users"),
     joinedAt: v.number(),
-  }).index("by_conversation", ["conversationId"]),
+  }).index("by_conversation", ["conversationId"])
+   .index("by_user", ["userId"]),
 });
