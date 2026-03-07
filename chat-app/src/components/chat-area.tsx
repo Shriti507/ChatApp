@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState, useRef, useEffect } from "react";
 import { Send, Paperclip, Image, File, X, Download } from "lucide-react";
@@ -9,7 +9,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatMessageTimestamp } from "../utils/format-timestamp";
 import { uploadFile, formatFileSize, downloadFile } from "../utils/file-hosting";
 import { Id } from "../../convex/_generated/dataModel";
+import { useTypingIndicator } from "../hooks/use-typing-indicator";
 
+const SCROLL_BOTTOM_THRESHOLD_PX = 80;
 
 interface ChatAreaProps {
   conversationId: string;
@@ -20,23 +22,128 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
   const [message, setMessage] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [hasNewMessages, setHasNewMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isAtBottomRef = useRef(true);
+  const prevMessageCountRef = useRef(0);
   const sendMessage = useMutation(api.functions.sendMessage);
-  
+  const markConversationAsRead = useMutation(api.functions.markConversationAsRead);
+
+  const { isAuthenticated } = useConvexAuth();
   const currentUser = useQuery(api.functions.getUserByClerkId, user ? { clerkId: user.id } : "skip");
-  
-  
-    const conversation = useQuery(api.functions.getConversationWithDetails, { conversationId: conversationId as Id<"conversations"> });
+  const conversation = useQuery(api.functions.getConversationWithDetails, { conversationId: conversationId as Id<"conversations"> });
   const messages = useQuery(api.functions.getMessages, { conversationId: conversationId as Id<"conversations"> });
 
-  // Auto-scroll to bottom when new messages arrive
+  // Typing indicator functionality
+  const { startTyping, stopTyping, otherUserTyping } = useTypingIndicator(conversationId as Id<"conversations">);
+
+  // Reset scroll tracking when switching conversations.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    prevMessageCountRef.current = 0;
+    isAtBottomRef.current = true;
+    setIsAtBottom(true);
+    setHasNewMessages(false);
+  }, [conversationId]);
+
+  // Mark as read when user opens conversation — only after Convex has validated Clerk token
+  useEffect(() => {
+    if (!isAuthenticated || !conversationId || !currentUser || !user) return;
+    const id = conversationId as Id<"conversations">;
+    markConversationAsRead({ conversationId: id, clerkId: user.id })
+      .then((result) => {
+        if (result && !result.ok) {
+          console.warn("[markAsRead] Convex returned:", result.reason);
+        }
+      })
+      .catch((err) => console.error("[markAsRead] Failed:", err));
+  }, [isAuthenticated, conversationId, currentUser, user, markConversationAsRead]);
+
+  // Also mark as read when user scrolls to bottom (e.g. after new messages arrive while viewing)
+  useEffect(() => {
+    if (!isAuthenticated || !conversationId || !currentUser || !messagesContainerRef.current || !messagesEndRef.current || !user) return;
+
+    const container = messagesContainerRef.current;
+    const sentinel = messagesEndRef.current;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          markConversationAsRead({ conversationId: conversationId as Id<"conversations">, clerkId: user.id });
+        }
+      },
+      { root: container, rootMargin: "0px", threshold: 0 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [isAuthenticated, conversationId, currentUser, user, markConversationAsRead]);
+
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({ behavior, block: "end" });
+  };
+
+  // Track whether the user is near the bottom of the scroll container.
+  useEffect(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+
+    let raf = 0;
+    const update = () => {
+      const atBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight < SCROLL_BOTTOM_THRESHOLD_PX;
+      isAtBottomRef.current = atBottom;
+      setIsAtBottom(atBottom);
+      if (atBottom) setHasNewMessages(false);
+    };
+
+    const onScroll = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        update();
+      });
+    };
+
+    update();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      if (raf) window.cancelAnimationFrame(raf);
+      el.removeEventListener("scroll", onScroll);
+    };
+  }, [conversationId]);
+
+  // Smart auto-scroll behavior for real-time messages.
+  useEffect(() => {
+    const count = messages?.length ?? 0;
+    const prev = prevMessageCountRef.current;
+    prevMessageCountRef.current = count;
+
+    // On first load (or when switching conversations), jump to bottom.
+    if (count > 0 && prev === 0) {
+      window.requestAnimationFrame(() => scrollToBottom("auto"));
+      setHasNewMessages(false);
+      return;
+    }
+
+    // When new messages arrive, auto-scroll only if the user is already at the bottom.
+    if (count > prev) {
+      if (isAtBottomRef.current) {
+        scrollToBottom("smooth");
+        setHasNewMessages(false);
+      } else {
+        setHasNewMessages(true);
+      }
+    }
+  }, [messages, conversationId]);
 
   const handleSendMessage = async () => {
     if ((!message.trim() && selectedFiles.length === 0) || !currentUser) return;
+    
+    // Stop typing indicator when sending message
+    stopTyping();
     
     try {
       // Upload files first
@@ -53,6 +160,8 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
       
       setMessage("");
       setSelectedFiles([]);
+      setHasNewMessages(false);
+      scrollToBottom("smooth");
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -204,7 +313,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
   }
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0" key={`chat-area-${conversationId}`}>
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
         <div className="flex items-center gap-3">
@@ -234,7 +343,11 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
       </div>
       
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-gray-900">
+      <div
+        key={`messages-${conversationId}`}
+        ref={messagesContainerRef}
+        className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-white dark:bg-gray-900"
+      >
         {messages?.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full py-12">
             <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
@@ -275,6 +388,39 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
             </div>
           ))
         )}
+        
+        {/* Typing Indicator */}
+        {otherUserTyping && otherUserTyping.length > 0 && (
+          <div key={`typing-${otherUserTyping[0]?.userId}`} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex gap-1">
+              <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+            <span>
+              {otherUserTyping[0]?.username} is typing
+              {otherUserTyping.length > 1 && ` and ${otherUserTyping.length - 1} other${otherUserTyping.length > 2 ? 's' : ''}`}
+            </span>
+          </div>
+        )}
+
+        {/* New messages indicator (only when user scrolled up) */}
+        {hasNewMessages && !isAtBottom && (
+          <div className="sticky bottom-4 flex justify-end pointer-events-none">
+            <button
+              type="button"
+              onClick={() => {
+                setHasNewMessages(false);
+                scrollToBottom("smooth");
+              }}
+              className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-blue-600 text-white px-3 py-2 text-sm shadow-lg hover:bg-blue-700 transition-colors"
+            >
+              <span className="text-base leading-none">↓</span>
+              New messages
+            </button>
+          </div>
+        )}
+        
         <div ref={messagesEndRef} />
       </div>
       
@@ -334,7 +480,18 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
             <input
               type="text"
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                if (e.target.value.trim()) {
+                  startTyping();
+                }
+              }}
+              onFocus={() => {
+                if (message.trim()) {
+                  startTyping();
+                }
+              }}
+              onBlur={stopTyping}
               onKeyPress={handleKeyPress}
               placeholder={selectedFiles.length > 0 ? "Add a message (optional)..." : "Type a message..."}
               className="w-full bg-transparent outline-none placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"

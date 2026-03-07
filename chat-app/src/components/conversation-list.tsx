@@ -13,6 +13,7 @@ export function ConversationList() {
   const router = useRouter();
   const currentUser = useQuery(api.functions.getUserByClerkId, user ? { clerkId: user.id } : "skip");
   const conversations = useQuery(api.functions.getUserConversationsWithDetails, currentUser ? { userId: currentUser._id } : "skip");
+  const unreadCounts = useQuery(api.functions.getUnreadCounts, user ? { clerkId: user.id } : "skip");
 
   if (!conversations || !currentUser) {
     return (
@@ -77,7 +78,7 @@ export function ConversationList() {
           </div>
         </div>
       ) : (
-        <div className="space-y-1 max-h-80 overflow-y-auto">
+        <div className="space-y-1 max-h-80 min-h-0 overflow-y-auto">
           {conversations
             .sort((a: any, b: any) => (b.lastMessageTime || 0) - (a.lastMessageTime || 0))
             .map((conversation: any) => (
@@ -87,7 +88,7 @@ export function ConversationList() {
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors group"
               >
                 {/* Avatar */}
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <Avatar className="w-10 h-10">
                     <AvatarImage 
                       src={conversation.otherUser?.imageUrl} 
@@ -109,26 +110,31 @@ export function ConversationList() {
                 
                 {/* Conversation info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
                       {conversation.otherUser?.username}
                     </div>
                     {conversation.lastMessageTime && (
-                      <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
+                      <span className="text-xs text-gray-500 flex-shrink-0">
                         {formatMessageTime(conversation.lastMessageTime)}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center justify-between mt-0.5">
-                    <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                      {conversation.lastMessage ? (
-                        truncateMessage(conversation.lastMessage.content)
-                      ) : (
-                        <span className="text-gray-400 dark:text-gray-500 italic">No messages yet</span>
-                      )}
-                    </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                    {conversation.lastMessage ? (
+                      truncateMessage(conversation.lastMessage.content)
+                    ) : (
+                      <span className="text-gray-400 dark:text-gray-500 italic">No messages yet</span>
+                    )}
                   </div>
                 </div>
+
+                {/* Unread count badge - small circular, right side, only when > 0 */}
+                {unreadCounts && (unreadCounts[conversation._id] || 0) > 0 && (
+                  <div className="flex-shrink-0 flex items-center justify-center h-5 min-w-5 rounded-full bg-blue-500 text-white text-xs font-medium">
+                    {(unreadCounts[conversation._id] || 0) > 99 ? "99+" : (unreadCounts[conversation._id] || 0)}
+                  </div>
+                )}
               </div>
             ))}
         </div>

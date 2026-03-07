@@ -14,6 +14,9 @@ http.route({
     const svix_timestamp = request.headers.get("svix-timestamp");
     const svix_signature = request.headers.get("svix-signature");
 
+    console.log("[Webhook] Headers:", { svix_id, svix_timestamp, svix_signature });
+    console.log("[Webhook] WEBHOOK_SECRET exists:", !!process.env.CLERK_WEBHOOK_SECRET);
+
     if (!svix_id || !svix_timestamp || !svix_signature) {
       return new Response("Error occurred -- no svix headers", {
         status: 400,
@@ -26,7 +29,7 @@ http.route({
     const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
     if (!WEBHOOK_SECRET) {
-      console.error("Missing CLERK_WEBHOOK_SECRET");
+      console.error("[Webhook] Missing CLERK_WEBHOOK_SECRET");
       return new Response("Configuration error", { status: 500 });
     }
 
@@ -50,11 +53,19 @@ http.route({
     const eventType = evt.type;
     const { id } = evt.data;
 
-    if (eventType === "user.created") {
-      const { username, first_name, last_name, image_url } = evt.data;
+    if (eventType === "user.created" || eventType === "user.updated") {
+      const { username, first_name, last_name, image_url, email_addresses } = evt.data;
+      
+      // For Google users, username might be null, use email or name instead
+      const userIdentifier = username || 
+        (email_addresses && email_addresses[0]?.email_address?.split('@')[0]) ||
+        first_name || 
+        last_name || 
+        "User";
+        
       await ctx.runMutation(api.functions.createUser, {
         clerkId: id as string,
-        username: username || first_name || last_name || "Unknown",
+        username: userIdentifier,
         imageUrl: image_url || "",
       });
     }

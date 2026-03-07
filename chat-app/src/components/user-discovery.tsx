@@ -139,7 +139,7 @@ export function UserDiscovery() {
           )}
         </div>
       ) : (
-        <div className="space-y-1 max-h-80 overflow-y-auto">
+        <div className="space-y-1 max-h-80 min-h-0 overflow-y-auto">
           {filteredUsers.map((user: any) => (
             <div
               key={user._id}
@@ -172,16 +172,9 @@ export function UserDiscovery() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 mt-0.5">
-                  {user.isOnline ? (
-                    <>
-                      <Circle className="w-1.5 h-1.5 fill-green-500 text-green-500" />
-                      <span className="text-xs text-green-600 font-medium">Online</span>
-                    </>
-                  ) : (
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {formatLastSeen(user.lastSeen)}
-                    </span>
-                  )}
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {formatLastSeen(user.lastSeen)}
+                  </span>
                 </div>
               </div>
               

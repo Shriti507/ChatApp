@@ -8,6 +8,9 @@ export default defineSchema({
     imageUrl: v.string(),
     isOnline: v.optional(v.boolean()),
     lastSeen: v.optional(v.number()),
+    isTyping: v.optional(v.boolean()),
+    typingConversationId: v.optional(v.id("conversations")),
+    lastTypingUpdate: v.optional(v.number()),
   }).index("by_clerk", ["clerkId"]),
   
   conversations: defineTable({
@@ -36,6 +39,9 @@ export default defineSchema({
     conversationId: v.id("conversations"),
     userId: v.id("users"),
     joinedAt: v.number(),
-  }).index("by_conversation", ["conversationId"])
-   .index("by_user", ["userId"]),
+    lastReadAt: v.optional(v.number()),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_user", ["userId"])
+    .index("by_user_conversation", ["userId", "conversationId"]),
 });
