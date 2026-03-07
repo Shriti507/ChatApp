@@ -16,6 +16,7 @@ export function useTypingIndicator(conversationId: Id<"conversations">) {
   const currentUser = useQuery(api.functions.getUserByClerkId, user ? { clerkId: user.id } : "skip");
   const setTypingStatus = useMutation(api.functions.setTypingStatus);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastUpdateRef = useRef(0);
   const [isTyping, setIsTyping] = useState(false);
 
   // Get typing indicators for this conversation
@@ -32,13 +33,15 @@ export function useTypingIndicator(conversationId: Id<"conversations">) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Set typing status
-    if (!isTyping) {
+    const now = Date.now();
+    // Set typing status if not already typing OR if it's been more than 3 seconds since last update
+    if (!isTyping || (now - lastUpdateRef.current > 3000)) {
       setIsTyping(true);
+      lastUpdateRef.current = now;
       setTypingStatus({
         conversationId,
         isTyping: true,
-        clerkId: user.id, // Pass clerkId
+        clerkId: user.id,
       });
     }
 
@@ -57,15 +60,15 @@ export function useTypingIndicator(conversationId: Id<"conversations">) {
 
     if (isTyping) {
       setIsTyping(false);
+      lastUpdateRef.current = 0;
       setTypingStatus({
         conversationId,
         isTyping: false,
-        clerkId: user.id, // Pass clerkId
+        clerkId: user.id,
       });
     }
   };
 
- 
   useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
@@ -75,7 +78,6 @@ export function useTypingIndicator(conversationId: Id<"conversations">) {
     };
   }, [currentUser, conversationId]);
 
-  // Filter out current user from typing indicators
   const otherUserTyping = typingIndicators?.filter(
     (indicator): indicator is NonNullable<typeof indicator> => 
       indicator !== null && indicator.userId !== currentUser?._id && indicator.isTyping

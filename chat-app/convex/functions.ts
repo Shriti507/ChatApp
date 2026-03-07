@@ -557,12 +557,6 @@ export const getUnreadCount = query({
     clerkId: v.string(),
   },
   handler: async (ctx, args) => {
-    console.log("[setTypingStatus] Setting typing status:", { 
-      conversationId: args.conversationId, 
-      isTyping: args.isTyping, 
-      clerkId: args.clerkId 
-    });
-    
     // Get user by clerkId instead of using identity
     const user = await ctx.db
       .query("users")
@@ -577,7 +571,6 @@ export const getUnreadCount = query({
     // Check if user is part of this conversation
     const conversation = await ctx.db.get(args.conversationId);
     if (!conversation || !conversation.memberIds.includes(user._id)) {
-      console.log("[setTypingStatus] User not in conversation");
       return null;
     }
 
