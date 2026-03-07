@@ -18,8 +18,8 @@ export function ConversationList() {
     return (
       <div className="p-4">
         <div className="flex items-center gap-2 mb-4">
-          <MessageCircle className="w-5 h-5 text-gray-500" />
-          <h3 className="text-sm font-medium text-gray-900">Conversations</h3>
+          <MessageCircle className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          <h3 className="text-sm font-medium text-gray-900 dark:text-white">Conversations</h3>
         </div>
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
@@ -46,9 +46,9 @@ export function ConversationList() {
     <div className="p-4">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <MessageCircle className="w-5 h-5 text-gray-500" />
-        <h3 className="text-sm font-medium text-gray-900">Conversations</h3>
-        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+        <MessageCircle className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        <h3 className="text-sm font-medium text-gray-900 dark:text-white">Conversations</h3>
+        <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
           {conversations.length}
         </span>
       </div>
@@ -56,21 +56,21 @@ export function ConversationList() {
       {/* Conversation List */}
       {conversations.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <MessageCircle className="w-6 h-6 text-gray-400" />
+          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+            <MessageCircle className="w-6 h-6 text-gray-400 dark:text-gray-500" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No conversations yet</h3>
-          <p className="text-sm text-gray-500 text-center max-w-md mb-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No conversations yet</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-md mb-6">
             Start chatting! Find users in the discovery section and send your first message
           </p>
           <div className="w-full space-y-3">
-            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-              <p className="text-xs text-amber-700">
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+              <p className="text-xs text-amber-700 dark:text-amber-300">
                 📝 Note: Conversations appear here after you send at least one message
               </p>
             </div>
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-xs text-blue-700">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-xs text-blue-700 dark:text-blue-300">
                 💡 Tip: Scroll down to discover users and start conversations
               </p>
             </div>
@@ -84,7 +84,7 @@ export function ConversationList() {
               <div
                 key={conversation._id}
                 onClick={() => handleConversationClick(conversation._id)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors group"
               >
                 {/* Avatar */}
                 <div className="relative">
@@ -110,7 +110,7 @@ export function ConversationList() {
                 {/* Conversation info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <div className="font-medium text-sm text-gray-900 truncate">
+                    <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
                       {conversation.otherUser?.username}
                     </div>
                     {conversation.lastMessageTime && (
@@ -120,11 +120,11 @@ export function ConversationList() {
                     )}
                   </div>
                   <div className="flex items-center justify-between mt-0.5">
-                    <div className="text-sm text-gray-500 truncate">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
                       {conversation.lastMessage ? (
                         truncateMessage(conversation.lastMessage.content)
                       ) : (
-                        <span className="text-gray-400 italic">No messages yet</span>
+                        <span className="text-gray-400 dark:text-gray-500 italic">No messages yet</span>
                       )}
                     </div>
                   </div>

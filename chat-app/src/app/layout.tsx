@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs';
 import { ConvexProvider } from "convex/react";
 import { ConvexClientProvider } from "../components/convex-client-provider";
+import { ThemeProvider } from "../contexts/theme-context";
+import { PresenceTracker } from "../components/presence-tracker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,15 +28,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider afterSignOutUrl="/sign-in">
       <ConvexClientProvider>
-        <html lang="en">
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
-            {children}
-          </body>
-        </html>
+        <ThemeProvider>
+          <html lang="en">
+            <body
+              className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            >
+              <PresenceTracker />
+              {children}
+            </body>
+          </html>
+        </ThemeProvider>
       </ConvexClientProvider>
     </ClerkProvider>
   );
