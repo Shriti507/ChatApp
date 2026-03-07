@@ -97,18 +97,6 @@ export function ConversationList() {
                       {conversation.otherUser?.username?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  {/* Online status indicator */}
-                  <div className="absolute -bottom-0.5 -right-0.5 z-10">
-                    <div className={`w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center ${
-                      conversation.otherUser?.isOnline 
-                        ? "bg-green-500 ring-1 ring-green-500/20" 
-                        : "bg-gray-400 dark:bg-gray-600"
-                    }`}>
-                      {conversation.otherUser?.isOnline && (
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse opacity-40"></div>
-                      )}
-                    </div>
-                  </div>
                 </div>
                 
                 {/* Conversation info */}
@@ -118,17 +106,26 @@ export function ConversationList() {
                       {conversation.otherUser?.username}
                     </div>
                     {conversation.lastMessageTime && (
-                      <span className="text-xs text-gray-500 flex-shrink-0">
+                      <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
                         {formatMessageTime(conversation.lastMessageTime)}
                       </span>
                     )}
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                    {conversation.lastMessage ? (
-                      truncateMessage(conversation.lastMessage.content)
-                    ) : (
-                      <span className="text-gray-400 dark:text-gray-500 italic">No messages yet</span>
-                    )}
+                  <div className="flex items-center justify-between gap-2 mt-0.5">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      {conversation.lastMessage ? (
+                        truncateMessage(conversation.lastMessage.content)
+                      ) : (
+                        <span className="text-gray-400 dark:text-gray-500 italic">No messages yet</span>
+                      )}
+                    </div>
+                    <span className={`text-[10px] font-medium uppercase tracking-wider ${
+                      conversation.otherUser?.isOnline 
+                        ? "text-green-600 dark:text-green-400" 
+                        : "text-gray-400 dark:text-gray-600"
+                    }`}>
+                      {conversation.otherUser?.isOnline ? "Online" : "Offline"}
+                    </span>
                   </div>
                 </div>
 
