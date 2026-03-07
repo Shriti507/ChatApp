@@ -324,27 +324,16 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
                 {otherUser?.username?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            {/* Online status indicator */}
-            <div className="absolute -bottom-0.5 -right-0.5 z-10">
-              <div className={`w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 shadow-sm flex items-center justify-center ${
-                otherUser?.isOnline 
-                  ? "bg-green-500 ring-1 ring-green-500/20" 
-                  : "bg-gray-400 dark:bg-gray-600"
-              }`}>
-                {otherUser?.isOnline && (
-                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse opacity-40"></div>
-                )}
-              </div>
-            </div>
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{otherUser?.username}</h2>
-            <div className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${otherUser?.isOnline ? "bg-green-500" : "bg-gray-400"}`}></span>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                {otherUser?.isOnline ? "Active now" : "Offline"}
-              </p>
-            </div>
+            <p className={`text-xs font-semibold ${
+              otherUser?.isOnline 
+                ? "text-green-600 dark:text-green-400" 
+                : "text-gray-400 dark:text-gray-500"
+            }`}>
+              {otherUser?.isOnline ? "Active now" : "Offline"}
+            </p>
           </div>
         </div>
       </div>

@@ -9,7 +9,7 @@ export default async function ConversationPage({ params }: { params: { conversat
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar: hidden on mobile, visible on md+ */}
-      <aside className="hidden md:block flex-shrink-0">
+      <aside className="hidden md:block flex-shrink-0 h-full">
         <ChatSidebar />
       </aside>
       {/* Chat area: full width on mobile, with back button */}

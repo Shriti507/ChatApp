@@ -154,30 +154,25 @@ export function UserDiscovery() {
                     {user.username.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                {/* Online status indicator */}
-                <div className="absolute -bottom-0.5 -right-0.5 z-10">
-                  <div className={`w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-800 shadow-sm flex items-center justify-center ${
-                    user.isOnline 
-                      ? "bg-green-500 ring-1 ring-green-500/20" 
-                      : "bg-gray-400 dark:bg-gray-600"
-                  }`}>
-                    {user.isOnline && (
-                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse opacity-40"></div>
-                    )}
-                  </div>
-                </div>
               </div>
               
               {/* User info */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between gap-2">
                   <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
                     <HighlightText text={user.username} highlight={debouncedSearchQuery} />
                   </div>
+                  <span className={`text-[10px] font-medium uppercase tracking-wider flex-shrink-0 ${
+                    user.isOnline 
+                      ? "text-green-600 dark:text-green-400" 
+                      : "text-gray-400 dark:text-gray-600"
+                  }`}>
+                    {user.isOnline ? "Online" : "Offline"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1 mt-0.5">
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatLastSeen(user.lastSeen)}
+                    Last seen {formatLastSeen(user.lastSeen)}
                   </span>
                 </div>
               </div>
