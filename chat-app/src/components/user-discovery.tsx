@@ -155,12 +155,16 @@ export function UserDiscovery() {
                   </AvatarFallback>
                 </Avatar>
                 {/* Online status indicator */}
-                <div className="absolute -bottom-0.5 -right-0.5">
-                  {user.isOnline ? (
-                    <Circle className="w-3 h-3 fill-green-500 text-green-500" />
-                  ) : (
-                    <Circle className="w-3 h-3 fill-gray-400 text-gray-400" />
-                  )}
+                <div className="absolute -bottom-0.5 -right-0.5 z-10">
+                  <div className={`w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-800 shadow-sm flex items-center justify-center ${
+                    user.isOnline 
+                      ? "bg-green-500 ring-1 ring-green-500/20" 
+                      : "bg-gray-400 dark:bg-gray-600"
+                  }`}>
+                    {user.isOnline && (
+                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse opacity-40"></div>
+                    )}
+                  </div>
                 </div>
               </div>
               

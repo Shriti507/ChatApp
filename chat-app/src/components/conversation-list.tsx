@@ -98,12 +98,16 @@ export function ConversationList() {
                     </AvatarFallback>
                   </Avatar>
                   {/* Online status indicator */}
-                  <div className="absolute -bottom-0.5 -right-0.5">
-                    {conversation.otherUser?.isOnline ? (
-                      <Circle className="w-3 h-3 fill-green-500 text-green-500" />
-                    ) : (
-                      <Circle className="w-3 h-3 fill-gray-400 text-gray-400" />
-                    )}
+                  <div className="absolute -bottom-0.5 -right-0.5 z-10">
+                    <div className={`w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center ${
+                      conversation.otherUser?.isOnline 
+                        ? "bg-green-500 ring-1 ring-green-500/20" 
+                        : "bg-gray-400 dark:bg-gray-600"
+                    }`}>
+                      {conversation.otherUser?.isOnline && (
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse opacity-40"></div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
@@ -130,8 +134,11 @@ export function ConversationList() {
 
 
                 {conversation.unreadCount > 0 && (
-                  <div className="flex-shrink-0 flex items-center justify-center h-5 min-w-5 rounded-full bg-blue-500 text-white text-xs font-medium">
-                    {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
+                  <div className="flex-shrink-0">
+                    <div className="relative flex h-6 min-w-[24px] items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 px-1.5 text-[11px] font-bold text-white shadow-sm ring-1 ring-white/10">
+                      {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
+                      <span className="absolute -inset-0.5 animate-pulse rounded-full bg-blue-400/20"></span>
+                    </div>
                   </div>
                 )}
               </div>
