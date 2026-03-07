@@ -1,7 +1,7 @@
 // Simple test to check typing indicator
 console.log("Testing typing indicator...");
 
-// Test if we can call the mutation
+
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 

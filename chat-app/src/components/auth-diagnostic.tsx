@@ -4,11 +4,6 @@ import { useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useConvexAuth } from "convex/react";
 
-/**
- * Logs Clerk → Convex auth state and token availability once when signed in.
- * Helps debug "No identity" by showing whether the client has a Convex token.
- * Only runs in development.
- */
 export function AuthDiagnostic() {
   const { isSignedIn, getToken } = useAuth();
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -24,7 +19,7 @@ export function AuthDiagnostic() {
     // Try multiple token approaches
     Promise.all([
       getToken({ template: "convex" }),
-      getToken(), // Try without template
+      getToken(), 
     ])
       .then(([convexToken, defaultToken]) => {
         if (cancelled) return;

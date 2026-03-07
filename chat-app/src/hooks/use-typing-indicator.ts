@@ -65,7 +65,7 @@ export function useTypingIndicator(conversationId: Id<"conversations">) {
     }
   };
 
-  // Clean up on unmount
+ 
   useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {

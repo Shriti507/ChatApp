@@ -64,7 +64,7 @@ export const getOtherUsers = query({
   },
 });
 
-export const createOrGetDirectMessage = mutation({
+export const createOrGetConversation = mutation({
   args: {
     user1Id: v.id("users"),
     user2Id: v.id("users"),
@@ -390,14 +390,12 @@ export const updateUserStatus = mutation({
         lastSeen: Date.now(),
       });
     } else {
-      // User doesn't exist - try to create them (for Google login users who might not have webhook triggered)
-      // This is a fallback for when the webhook fails
       console.log("User not found for status update, may need to re-login");
     }
   },
 });
 
-// Unread count: mark conversation as read when user opens it
+
 export const markConversationAsRead = mutation({
   args: {
     conversationId: v.id("conversations"),
@@ -544,8 +542,8 @@ export const getUnreadCount = query({
 
     // Count messages sent after user's last read time
     const unreadCount = messages.filter(msg => 
-      msg.senderId !== user._id && // Don't count own messages
-      msg.createdAt > (membership.lastReadAt || 0) // Count only messages after last read time
+      msg.senderId !== user._id && 
+      msg.createdAt > (membership.lastReadAt || 0) 
     ).length;
 
     console.log("[getUnreadCount] Unread count:", unreadCount);
@@ -615,7 +613,7 @@ export const getTypingIndicators = query({
         const now = Date.now();
         if (user.lastTypingUpdate && (now - user.lastTypingUpdate) > 5000) {
           // User stopped typing more than 5 seconds ago, skip them
-          // Note: Their typing status will be cleared when they send a message or next start typing
+       
           return null;
         }
 

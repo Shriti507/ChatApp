@@ -129,7 +129,7 @@ export function ConversationList() {
                   </div>
                 </div>
 
-                {/* Unread count badge - small circular, right side, only when > 0 */}
+
                 {unreadCounts && (unreadCounts[conversation._id] || 0) > 0 && (
                   <div className="flex-shrink-0 flex items-center justify-center h-5 min-w-5 rounded-full bg-blue-500 text-white text-xs font-medium">
                     {(unreadCounts[conversation._id] || 0) > 99 ? "99+" : (unreadCounts[conversation._id] || 0)}

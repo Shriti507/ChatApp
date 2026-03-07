@@ -61,7 +61,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
       .catch((err) => console.error("[markAsRead] Failed:", err));
   }, [isAuthenticated, conversationId, currentUser, user, markConversationAsRead]);
 
-  // Also mark as read when user scrolls to bottom (e.g. after new messages arrive while viewing)
+  // Also mark as read when user scrolls to bottom 
   useEffect(() => {
     if (!isAuthenticated || !conversationId || !currentUser || !messagesContainerRef.current || !messagesEndRef.current || !user) return;
 
@@ -178,7 +178,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
     if (!files) return;
     
     const newFiles = Array.from(files).filter(file => {
-      // Check file size (max 2MB for Convex compatibility)
+      // Check file size (max 2MB )
       if (file.size > 2 * 1024 * 1024) {
         alert(`File "${file.name}" is too large. Maximum size is 2MB.`);
         return false;
@@ -404,7 +404,6 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
           </div>
         )}
 
-        {/* New messages indicator (only when user scrolled up) */}
         {hasNewMessages && !isAtBottom && (
           <div className="sticky bottom-4 flex justify-end pointer-events-none">
             <button
