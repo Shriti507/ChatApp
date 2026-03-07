@@ -13,7 +13,6 @@ export function ConversationList() {
   const router = useRouter();
   const currentUser = useQuery(api.functions.getUserByClerkId, user ? { clerkId: user.id } : "skip");
   const conversations = useQuery(api.functions.getUserConversationsWithDetails, currentUser ? { userId: currentUser._id } : "skip");
-  const unreadCounts = useQuery(api.functions.getUnreadCounts, user ? { clerkId: user.id } : "skip");
 
   if (!conversations || !currentUser) {
     return (
@@ -130,9 +129,9 @@ export function ConversationList() {
                 </div>
 
 
-                {unreadCounts && (unreadCounts[conversation._id] || 0) > 0 && (
+                {conversation.unreadCount > 0 && (
                   <div className="flex-shrink-0 flex items-center justify-center h-5 min-w-5 rounded-full bg-blue-500 text-white text-xs font-medium">
-                    {(unreadCounts[conversation._id] || 0) > 99 ? "99+" : (unreadCounts[conversation._id] || 0)}
+                    {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
                   </div>
                 )}
               </div>
