@@ -115,11 +115,17 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
     };
   }, [conversationId]);
 
+  const typingCount = otherUserTyping?.length || 0;
+  const prevTypingCountRef = useRef(typingCount);
+
   // Smart auto-scroll behavior for real-time messages.
   useEffect(() => {
     const count = messages?.length ?? 0;
     const prev = prevMessageCountRef.current;
     prevMessageCountRef.current = count;
+
+    const prevTyping = prevTypingCountRef.current;
+    prevTypingCountRef.current = typingCount;
 
     // On first load (or when switching conversations), jump to bottom.
     if (count > 0 && prev === 0) {
@@ -128,16 +134,16 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
       return;
     }
 
-    // When new messages arrive, auto-scroll only if the user is already at the bottom.
-    if (count > prev) {
+    // When new messages arrive OR typing indicator appears, auto-scroll only if the user is already at the bottom.
+    if (count > prev || (typingCount > prevTyping)) {
       if (isAtBottomRef.current) {
         scrollToBottom("smooth");
         setHasNewMessages(false);
-      } else {
+      } else if (count > prev) {
         setHasNewMessages(true);
       }
     }
-  }, [messages, conversationId]);
+  }, [messages, conversationId, typingCount]);
 
   const handleSendMessage = async () => {
     if ((!message.trim() && selectedFiles.length === 0) || !currentUser) return;
@@ -387,15 +393,18 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
         
         {/* Typing Indicator */}
         {otherUserTyping && otherUserTyping.length > 0 && (
-          <div key={`typing-${otherUserTyping[0]?.userId}`} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex gap-1">
-              <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          <div key={`typing-${otherUserTyping[0]?.userId}`} className="flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300 px-2 py-1">
+            <div className="flex-shrink-0 flex items-center gap-1 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-2xl rounded-bl-none shadow-sm border border-gray-200/50 dark:border-gray-700/50">
+              <div className="flex gap-1.5 pt-0.5">
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></div>
+              </div>
             </div>
-            <span>
-              {otherUserTyping[0]?.username} is typing
+            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 italic">
+              {otherUserTyping[0]?.username}
               {otherUserTyping.length > 1 && ` and ${otherUserTyping.length - 1} other${otherUserTyping.length > 2 ? 's' : ''}`}
+              {" is typing..."}
             </span>
           </div>
         )}
