@@ -257,3 +257,74 @@ export const getUserConversationsWithDetails = query({
     return conversations.filter(Boolean);
   },
 });
+export const deleteUser = mutation({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk", (q) => q.eq("clerkId", args.clerkId))
+      .first();
+
+    if (!user) return;
+
+    // Find all memberships
+    const memberships = await ctx.db
+      .query("conversationMembers")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    // Process each conversation the user was in
+    for (const membership of memberships) {
+      const conversation = await ctx.db.get(membership.conversationId);
+      if (!conversation) continue;
+
+      if (!conversation.isGroup) {
+        // For one-on-one conversations, delete the entire conversation and its messages
+        const messages = await ctx.db
+          .query("messages")
+          .withIndex("by_conversation", (q) => q.eq("conversationId", conversation._id))
+          .collect();
+
+        for (const msg of messages) {
+          await ctx.db.delete(msg._id);
+        }
+
+        // Delete all memberships for this conversation
+        const allMemberships = await ctx.db
+          .query("conversationMembers")
+          .withIndex("by_conversation", (q) => q.eq("conversationId", conversation._id))
+          .collect();
+
+        for (const m of allMemberships) {
+          await ctx.db.delete(m._id);
+        }
+
+        await ctx.db.delete(conversation._id);
+      } else {
+        // For group conversations, just remove the user from memberIds and delete their membership
+        const newMemberIds = conversation.memberIds.filter(id => id !== user._id);
+        await ctx.db.patch(conversation._id, { memberIds: newMemberIds });
+        await ctx.db.delete(membership._id);
+      }
+    }
+
+    // Finally delete the user
+    await ctx.db.delete(user._id);
+  },
+});
+export const updateUserStatus = mutation({
+  args: { clerkId: v.string(), isOnline: v.boolean() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk", (q) => q.eq("clerkId", args.clerkId))
+      .first();
+
+    if (user) {
+      await ctx.db.patch(user._id, {
+        isOnline: args.isOnline,
+        lastSeen: Date.now(),
+      });
+    }
+  },
+});

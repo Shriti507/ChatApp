@@ -149,31 +149,31 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
                 ) : (
                   // Display other files as download cards
                   <div
-                    className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     onClick={() => handleFileDownload(attachment)}
                   >
                     <div className="flex-shrink-0">
                       {attachment.type.startsWith('video/') ? (
-                        <div className="w-8 h-8 bg-purple-100 rounded flex items-center justify-center">
+                        <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/40 rounded flex items-center justify-center">
                           <span className="text-xs">🎥</span>
                         </div>
                       ) : attachment.type.startsWith('audio/') ? (
-                        <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
+                        <div className="w-8 h-8 bg-green-100 dark:bg-green-900/40 rounded flex items-center justify-center">
                           <span className="text-xs">🎵</span>
                         </div>
                       ) : (
-                        <File className="w-4 h-4 text-gray-500" />
+                        <File className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-900 truncate">
+                      <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
                         {attachment.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {formatFileSize(attachment.size)}
                       </p>
                     </div>
-                    <Download className="w-3 h-3 text-gray-400" />
+                    <Download className="w-3 h-3 text-gray-400 dark:text-gray-500" />
                   </div>
                 )}
               </div>
@@ -206,7 +206,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
   return (
     <div className="flex-1 flex flex-col">
       {/* Header */}
-      <div className="border-b border-gray-200 p-4">
+      <div className="border-b border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
         <div className="flex items-center gap-3">
           <div className="relative">
             <Avatar className="w-8 h-8">
@@ -215,17 +215,18 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
                 {otherUser?.username?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
+            {/* Online status indicator */}
             <div className="absolute -bottom-0.5 -right-0.5">
               {otherUser?.isOnline ? (
-                <div className="w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
+                <div className="w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
               ) : (
-                <div className="w-2.5 h-2.5 bg-gray-400 rounded-full border-2 border-white"></div>
+                <div className="w-2.5 h-2.5 bg-gray-400 rounded-full border-2 border-white dark:border-gray-800"></div>
               )}
             </div>
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">{otherUser?.username}</h2>
-            <p className="text-xs text-gray-500">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{otherUser?.username}</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {otherUser?.isOnline ? "Online" : "Offline"}
             </p>
           </div>
@@ -233,18 +234,18 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
       </div>
       
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-gray-900">
         {messages?.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <Send className="w-6 h-6 text-gray-400" />
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+              <Send className="w-6 h-6 text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No messages yet</h3>
-            <p className="text-sm text-gray-500 text-center max-w-md">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No messages yet</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-md">
               Start the conversation! Send a message to begin chatting with {otherUser?.username}
             </p>
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-xs text-blue-700">
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-xs text-blue-700 dark:text-blue-300">
                 Tip: Type your message below and press Enter or click the send button
               </p>
             </div>
@@ -260,12 +261,12 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
                   className={`px-4 py-2 rounded-lg ${
                     msg.senderId === currentUser._id
                       ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-900"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
                   }`}
                 >
                   {renderMessageContent(msg)}
                 </div>
-                <p className={`text-xs text-gray-500 mt-1 ${
+                <p className={`text-xs text-gray-500 dark:text-gray-400 mt-1 ${
                   msg.senderId === currentUser._id ? "text-right" : "text-left"
                 }`}>
                   {formatMessageTime(msg.createdAt)}
@@ -278,19 +279,19 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
       </div>
       
       {/* Message Input */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
         {/* File Preview */}
         {selectedFiles.length > 0 && (
-          <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
             <div className="flex flex-wrap gap-2">
               {selectedFiles.map((file, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-gray-300 text-sm"
+                  className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-500 text-sm"
                 >
                   {getFileIcon(file)}
-                  <span className="truncate max-w-[150px]">{file.name}</span>
-                  <span className="text-gray-500 text-xs">({formatFileSize(file.size)})</span>
+                  <span className="truncate max-w-[150px] text-gray-900 dark:text-white">{file.name}</span>
+                  <span className="text-gray-500 dark:text-gray-300 text-xs">({formatFileSize(file.size)})</span>
                   <button
                     onClick={() => removeFile(index)}
                     className="text-gray-400 hover:text-red-500 transition-colors"
@@ -316,7 +317,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
           
           <button
             onClick={handleFileInputClick}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             title="Attach file"
           >
             <Paperclip className="w-5 h-5" />
@@ -324,7 +325,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
           
           <div
             className={`flex-1 px-4 py-2 border rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-colors ${
-              isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+              isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -336,7 +337,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={selectedFiles.length > 0 ? "Add a message (optional)..." : "Type a message..."}
-              className="w-full bg-transparent outline-none placeholder-gray-500"
+              className="w-full bg-transparent outline-none placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
             />
           </div>
           
@@ -350,7 +351,7 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
         </div>
         
         {isDragging && (
-          <div className="mt-2 text-center text-sm text-blue-600">
+          <div className="mt-2 text-center text-sm text-blue-600 dark:text-blue-400">
             Drop files here to attach
           </div>
         )}
