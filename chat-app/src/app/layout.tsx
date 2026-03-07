@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs';
-import { ConvexProvider } from "convex/react";
 import { ConvexClientProvider } from "../components/convex-client-provider";
 import { ThemeProvider } from "../contexts/theme-context";
 import { PresenceTracker } from "../components/presence-tracker";
